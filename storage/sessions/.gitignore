@@ -1,0 +1,5 @@
+# Abaikan berkas sesi & probe runtime
+*
+!.gitkeep
+!.htaccess
+!.gitignore

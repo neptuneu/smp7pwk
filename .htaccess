@@ -1,0 +1,21 @@
+# ==============================================================
+# Konfigurasi Apache — Sistem Akademik SMPN 7 Purwakarta
+# ==============================================================
+Options -Indexes
+
+# Jangan sajikan berkas sensitif secara langsung.
+<FilesMatch "(^\.|\.sql$|\.md$|\.log$|\.ini$|\.csv$)">
+    Require all denied
+</FilesMatch>
+
+# Blokir akses langsung ke folder internal.
+RedirectMatch 403 ^/database(/|$)
+RedirectMatch 403 ^/storage(/|$)
+RedirectMatch 403 ^/tools(/|$)
+
+# Header keamanan dasar.
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

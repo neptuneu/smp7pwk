@@ -1,0 +1,5 @@
+# Artefak runtime / lokal
+.dsh_write_test.txt
+*.log
+storage/sessions/sess_*
+storage/sessions/.session_probe
