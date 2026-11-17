@@ -22,7 +22,7 @@ $old = ['identifier' => ''];
 $justRegistered = isset($_GET['registered']);
 
 /**
- * Ambil user berdasarkan username, NIP guru, atau NISN siswa.
+ * Ambil user berdasarkan username, NIP guru, NIS siswa, atau NISN siswa.
  */
 function find_login_user(mysqli $db, string $identifier): ?array
 {
@@ -33,9 +33,9 @@ function find_login_user(mysqli $db, string $identifier): ?array
             FROM users u
             LEFT JOIN data_guru g ON g.user_id = u.id
             LEFT JOIN data_siswa s ON s.user_id = u.id
-            WHERE u.username = ? OR g.nip = ? OR s.nisn = ?
+            WHERE u.username = ? OR g.nip = ? OR s.nis = ? OR s.nisn = ?
             LIMIT 1";
-    return db_select_one($db, $sql, 'sss', [$identifier, $identifier, $identifier]);
+    return db_select_one($db, $sql, 'ssss', [$identifier, $identifier, $identifier, $identifier]);
 }
 /** Catat login gagal. Return true bila akun baru saja dikunci. */
 function catat_login_gagal(int $now): bool
@@ -162,7 +162,7 @@ $csrf = csrf_token();
     <section class="md:col-span-7 p-6 sm:p-10 flex flex-col justify-center">
       <div class="max-w-md w-full mx-auto">
         <h2 class="text-xl sm:text-2xl font-extrabold text-indigo-950">Masuk ke Akun Anda</h2>
-        <p class="text-xs text-slate-500 mt-1">Gunakan username, NIP guru, atau NISN siswa beserta kata sandi.</p>
+        <p class="text-xs text-slate-500 mt-1">Siswa gunakan NIS &amp; 4 digit terakhir NIS sebagai sandi. Guru gunakan NIP.</p>
 
         <?php if ($justRegistered): ?>
           <div class="mt-4 p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold flex items-start gap-2.5">
@@ -187,9 +187,9 @@ $csrf = csrf_token();
           <input type="hidden" name="next" value="<?= e((string) $nextValue) ?>">
 
           <div>
-            <label for="identifier" class="block font-bold text-slate-700 mb-1.5">Username / NIP / NISN</label>
+            <label for="identifier" class="block font-bold text-slate-700 mb-1.5">NIS Siswa / NIP Guru / Username</label>
             <input id="identifier" name="identifier" type="text" required autocomplete="username"
-                   value="<?= e($old['identifier']) ?>" placeholder="contoh: admin / 1985xxxx / 0098xxxx"
+                   value="<?= e($old['identifier']) ?>" placeholder="contoh: 24257001 (NIS) / 1985xxxx (NIP) / admin"
                    class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 focus:outline-none">
           </div>
 

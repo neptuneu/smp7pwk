@@ -111,6 +111,7 @@ CREATE TABLE `rombel` (
 CREATE TABLE `data_siswa` (
   `id`            INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id`       INT UNSIGNED DEFAULT NULL,
+  `nis`           VARCHAR(20) DEFAULT NULL,
   `nisn`          VARCHAR(20) DEFAULT NULL,
   `nama_siswa`    VARCHAR(150) NOT NULL,
   `rombel_id`     INT UNSIGNED DEFAULT NULL,
@@ -123,6 +124,7 @@ CREATE TABLE `data_siswa` (
   `created_at`    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_siswa_nis` (`nis`),
   UNIQUE KEY `uq_siswa_nisn` (`nisn`),
   UNIQUE KEY `uq_siswa_user` (`user_id`),
   KEY `idx_siswa_rombel` (`rombel_id`),
@@ -361,7 +363,7 @@ INSERT INTO `users` (`username`, `email`, `nama_lengkap`, `password_hash`, `role
 VALUES ('admin', 'admin@smpn7purwakarta.sch.id', 'Administrator Sekolah', '$2y$10$6qqFvK3VdhT7TKB/ZTfz7enuYrTUbSr4YZFrFgFopgTEsk0rX/4im', 'admin');
 
 -- ==============================================================
--- SEED: 11 MATA PELAJARAN
+-- SEED: 12 MATA PELAJARAN
 -- ==============================================================
 INSERT INTO `mata_pelajaran`
   (`kode`, `nama`, `kelompok`, `jam_per_minggu`, `kkm`, `cakupan_rombel`) VALUES
@@ -375,7 +377,8 @@ INSERT INTO `mata_pelajaran`
 ('MP-08', 'Informatika',                       'Kelompok B (Pengembangan)',   2, 75, 27),
 ('MP-09', 'Pendidikan Jasmani (PJOK)',         'Kelompok B (Pengembangan)',   3, 78, 27),
 ('MP-10', 'Seni Budaya',                       'Kelompok B (Pengembangan)',   3, 75, 27),
-('MP-11', 'Bahasa Sunda (Muatan Lokal)',       'Kelompok C (Muatan Lokal)',   2, 75, 27);
+('MP-11', 'Bahasa Sunda (Muatan Lokal)',       'Kelompok C (Muatan Lokal)',   2, 75, 27),
+('MP-12', 'AKPK',                              'Kelompok C (Pengembangan)',   1, 75, 27);
 
 -- ==============================================================
 -- SEED: 27 ROMBEL (VII A - IX I)

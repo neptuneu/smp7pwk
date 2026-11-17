@@ -138,6 +138,7 @@ function resolve_mapel_id(mysqli $db, string $raw): ?int
         'sunda'             => 'Bahasa Sunda (Muatan Lokal)',
         'bahasa sunda'      => 'Bahasa Sunda (Muatan Lokal)',
         'mulok'             => 'Bahasa Sunda (Muatan Lokal)',
+        'akpk'              => 'AKPK',
     ];
 
     $norm = normalize_mapel_key($raw);
@@ -268,36 +269,74 @@ function sync_teacher_assignments(mysqli $db, array $guru, string $mapelStr, str
         [$guruId, $tahun, $semester]
     );
 
-    $mapelIds = [];
-    foreach (preg_split('/[\/,]+/', $mapelStr) as $part) {
-        $id = resolve_mapel_id($db, $part);
-        if ($id) {
-            $mapelIds[$id] = true;
-        }
-    }
-    $classCodes = parse_class_codes($kelasStr);
-    if (empty($classCodes)) {
-        $singleCode = extract_class_code($kelasStr);
-        if ($singleCode !== null) {
-            $classCodes = [$singleCode];
-        }
-    }
-    foreach (array_keys($mapelIds) as $mapelId) {
-        foreach ($classCodes as $code) {
-            $rombel = get_rombel($db, $code);
-            if (!$rombel) {
+    // Cek apakah pembagian mapel dan kelas menggunakan pemetaan per segmen '/'
+    $mapelParts = array_values(array_filter(array_map('trim', explode('/', $mapelStr)), fn($s) => $s !== ''));
+    $kelasParts = array_values(array_filter(array_map('trim', explode('/', $kelasStr)), fn($s) => $s !== ''));
+
+    if (count($mapelParts) > 1 && count($mapelParts) === count($kelasParts)) {
+        for ($i = 0; $i < count($mapelParts); $i++) {
+            $mid = resolve_mapel_id($db, $mapelParts[$i]);
+            if (!$mid) {
                 continue;
             }
-            try {
-                db_insert(
-                    $db,
-                    'INSERT INTO pengampu (guru_id, mapel_id, rombel_id, tahun_ajaran, semester) VALUES (?, ?, ?, ?, ?)',
-                    'iiiss',
-                    [$guruId, $mapelId, (int) $rombel['id'], $tahun, $semester]
-                );
-            } catch (mysqli_sql_exception $e) {
-                if ($e->getCode() !== 1062) {
-                    throw $e;
+            $classCodes = parse_class_codes($kelasParts[$i]);
+            if (empty($classCodes)) {
+                $singleCode = extract_class_code($kelasParts[$i]);
+                if ($singleCode !== null) {
+                    $classCodes = [$singleCode];
+                }
+            }
+            foreach ($classCodes as $code) {
+                $rombel = get_rombel($db, $code);
+                if (!$rombel) {
+                    continue;
+                }
+                try {
+                    db_insert(
+                        $db,
+                        'INSERT INTO pengampu (guru_id, mapel_id, rombel_id, tahun_ajaran, semester) VALUES (?, ?, ?, ?, ?)',
+                        'iiiss',
+                        [$guruId, $mid, (int) $rombel['id'], $tahun, $semester]
+                    );
+                } catch (mysqli_sql_exception $e) {
+                    if ($e->getCode() !== 1062) {
+                        throw $e;
+                    }
+                }
+            }
+        }
+    } else {
+        $mapelIds = [];
+        foreach (preg_split('/[\/,]+/', $mapelStr) as $part) {
+            $id = resolve_mapel_id($db, $part);
+            if ($id) {
+                $mapelIds[$id] = true;
+            }
+        }
+        $classCodes = parse_class_codes($kelasStr);
+        if (empty($classCodes)) {
+            $singleCode = extract_class_code($kelasStr);
+            if ($singleCode !== null) {
+                $classCodes = [$singleCode];
+            }
+        }
+        foreach (array_keys($mapelIds) as $mapelId) {
+            foreach ($classCodes as $code) {
+                $rombel = get_rombel($db, $code);
+                if (!$rombel) {
+                    continue;
+                }
+                try {
+                    db_insert(
+                        $db,
+                        'INSERT INTO pengampu (guru_id, mapel_id, rombel_id, tahun_ajaran, semester) VALUES (?, ?, ?, ?, ?)',
+                        'iiiss',
+                        [$guruId, $mapelId, (int) $rombel['id'], $tahun, $semester]
+                    );
+                } catch (mysqli_sql_exception $e) {
+                    if ($e->getCode() !== 1062) {
+                        throw $e;
+                    }
                 }
             }
         }
@@ -996,6 +1035,7 @@ try {
             assert_role($user, ['admin']);
             $id = inp_int('id');
             $nisn = inp('nisn');
+            $nis = inp('nis');
             $name = inp('name');
             $gender = inp('gender', 'L');
             $class = inp('class');
@@ -1016,38 +1056,64 @@ try {
                 $dup = db_select_one($koneksi, 'SELECT id FROM data_siswa WHERE nisn = ? AND id <> ? LIMIT 1', 'si', [$nisn, $id]);
                 if ($dup) fail('NISN tersebut sudah terdaftar pada siswa lain.');
             }
+            if ($nis !== '') {
+                $dupNis = db_select_one($koneksi, 'SELECT id FROM data_siswa WHERE nis = ? AND id <> ? LIMIT 1', 'si', [$nis, $id]);
+                if ($dupNis) fail('NIS tersebut sudah terdaftar pada siswa lain.');
+            }
 
             $koneksi->begin_transaction();
             if ($id > 0) {
-                db_execute(
-                    $koneksi,
-                    'UPDATE data_siswa SET nisn = ?, nama_siswa = ?, rombel_id = ?, gender = ?, orang_tua = ?, telepon = ?, status = ? WHERE id = ?',
-                    'ssissssi',
-                    [$nisn !== '' ? $nisn : null, $name, $rombelId, $gender, $parent, $phone, $status, $id]
-                );
+                if ($nis !== '') {
+                    db_execute(
+                        $koneksi,
+                        'UPDATE data_siswa SET nis = ?, nisn = ?, nama_siswa = ?, rombel_id = ?, gender = ?, orang_tua = ?, telepon = ?, status = ? WHERE id = ?',
+                        'ssssissssi',
+                        [$nis, $nisn !== '' ? $nisn : null, $name, $rombelId, $gender, $parent, $phone, $status, $id]
+                    );
+                } else {
+                    db_execute(
+                        $koneksi,
+                        'UPDATE data_siswa SET nisn = ?, nama_siswa = ?, rombel_id = ?, gender = ?, orang_tua = ?, telepon = ?, status = ? WHERE id = ?',
+                        'ssissssi',
+                        [$nisn !== '' ? $nisn : null, $name, $rombelId, $gender, $parent, $phone, $status, $id]
+                    );
+                }
                 $studentId = $id;
             } else {
                 $studentId = db_insert(
                     $koneksi,
-                    'INSERT INTO data_siswa (nisn, nama_siswa, rombel_id, gender, orang_tua, telepon, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                    'ssissss',
-                    [$nisn !== '' ? $nisn : null, $name, $rombelId, $gender, $parent, $phone, $status]
+                    'INSERT INTO data_siswa (nis, nisn, nama_siswa, rombel_id, gender, orang_tua, telepon, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                    'sssissss',
+                    [$nis !== '' ? $nis : null, $nisn !== '' ? $nisn : null, $name, $rombelId, $gender, $parent, $phone, $status]
                 );
             }
 
-            // Akun login siswa (username = NISN) agar dapat masuk ke Portal Siswa.
+            // Akun login siswa (username = NIS, password = 4 digit terakhir NIS)
             $student = db_select_one($koneksi, 'SELECT * FROM data_siswa WHERE id = ?', 'i', [$studentId]);
+            $studentNis = trim((string) ($student['nis'] ?? ''));
+            $studentNisn = trim((string) ($student['nisn'] ?? ''));
+            $username = $studentNis !== '' ? $studentNis : ($studentNisn !== '' ? $studentNisn : ('siswa' . $studentId));
+            $passwordRaw = $studentNis !== '' && strlen($studentNis) >= 4 ? substr($studentNis, -4) : DEFAULT_STUDENT_PASSWORD;
+            $passwordHash = password_hash($passwordRaw, PASSWORD_DEFAULT);
+
             if (empty($student['user_id'])) {
-                $username = $nisn !== '' ? $nisn : ('siswa' . $studentId);
-                if (!db_select_one($koneksi, 'SELECT id FROM users WHERE username = ?', 's', [$username])) {
+                $existingUser = db_select_one($koneksi, 'SELECT id FROM users WHERE username = ?', 's', [$username]);
+                if ($existingUser) {
+                    $userId = (int) $existingUser['id'];
+                    db_execute($koneksi, 'UPDATE users SET password_hash = ?, nama_lengkap = ?, role = \'siswa\', is_active = 1 WHERE id = ?', 'ssi', [$passwordHash, $name, $userId]);
+                } else {
                     $userId = db_insert(
                         $koneksi,
-                        'INSERT INTO users (username, nama_lengkap, password_hash, role) VALUES (?, ?, ?, ?)',
-                        'ssss',
-                        [$username, $name, password_hash(DEFAULT_STUDENT_PASSWORD, PASSWORD_DEFAULT), 'siswa']
+                        'INSERT INTO users (username, nama_lengkap, password_hash, role, is_active) VALUES (?, ?, ?, \'siswa\', 1)',
+                        'sss',
+                        [$username, $name, $passwordHash]
                     );
-                    db_execute($koneksi, 'UPDATE data_siswa SET user_id = ? WHERE id = ?', 'ii', [$userId, $studentId]);
                 }
+                db_execute($koneksi, 'UPDATE data_siswa SET user_id = ? WHERE id = ?', 'ii', [$userId, $studentId]);
+            } else {
+                db_execute($koneksi, 'UPDATE users SET username = ?, nama_lengkap = ?, password_hash = ? WHERE id = ?', 'sssi', [
+                    $username, $name, $passwordHash, (int) $student['user_id']
+                ]);
             }
             $koneksi->commit();
             ok('Data siswa berhasil disimpan.', ['id' => $studentId]);
@@ -1128,12 +1194,13 @@ try {
                     [$nisn !== '' ? $nisn : null, $nama, $rombel ? (int) $rombel['id'] : null, $gender, $parent, $phone, in_array($status, ['Aktif', 'Lulus', 'Mutasi', 'Mengundurkan Diri'], true) ? $status : 'Aktif']
                 );
                 $username = $nisn !== '' ? $nisn : ('siswa' . $studentId);
+                $pwdRaw = strlen($username) >= 4 ? substr($username, -4) : DEFAULT_STUDENT_PASSWORD;
                 if (!db_select_one($koneksi, 'SELECT id FROM users WHERE username = ?', 's', [$username])) {
                     $userId = db_insert(
                         $koneksi,
-                        'INSERT INTO users (username, nama_lengkap, password_hash, role) VALUES (?, ?, ?, ?)',
-                        'ssss',
-                        [$username, $nama, password_hash(DEFAULT_STUDENT_PASSWORD, PASSWORD_DEFAULT), 'siswa']
+                        'INSERT INTO users (username, nama_lengkap, password_hash, role, is_active) VALUES (?, ?, ?, \'siswa\', 1)',
+                        'sss',
+                        [$username, $nama, password_hash($pwdRaw, PASSWORD_DEFAULT)]
                     );
                     db_execute($koneksi, 'UPDATE data_siswa SET user_id = ? WHERE id = ?', 'ii', [$userId, $studentId]);
                 }

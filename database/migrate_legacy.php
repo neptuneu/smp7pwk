@@ -126,6 +126,7 @@ function resolve_mapel(mysqli $db, string $raw): ?int
         'pjok' => 'Pendidikan Jasmani (PJOK)', 'penjas' => 'Pendidikan Jasmani (PJOK)',
         'seni budaya' => 'Seni Budaya', 'seni' => 'Seni Budaya',
         'sunda' => 'Bahasa Sunda (Muatan Lokal)', 'bahasa sunda' => 'Bahasa Sunda (Muatan Lokal)', 'mulok' => 'Bahasa Sunda (Muatan Lokal)',
+        'akpk' => 'AKPK',
     ];
     foreach ($aliases as $needle => $target) {
         if ($norm === $needle || str_contains($norm, $needle)) {
