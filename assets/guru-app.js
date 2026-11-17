@@ -1021,15 +1021,15 @@
     renderSemesterRecap();
   }
 
-  function renderWaliSubjectOptions() {
-    const select = document.getElementById('select-wali-pov-subject');
-    const selectMateri = document.getElementById('modul-pov-subject');
-    if (!select && !selectMateri) return;
-    const names = Object.keys(G.ledger).length ? Object.keys(G.ledger) : G.allMapel.map(function (m) { return m.nama; });
-    const html = names.map(function (name) {
-      const teacher = G.ledger[name] ? G.ledger[name].teacher : '';
-      return '<option value="' + esc(name) + '">' + esc(name) + (teacher ? ' (' + esc(teacher) + ')' : '') + '</option>';
-    }).join('');
+ function renderWaliSubjectOptions() {
+  const select = document.getElementById('select-wali-pov-subject');
+  const selectMateri = document.getElementById('modul-pov-subject');
+  if (!select && !selectMateri) return;
+  const names = Object.keys(G.ledger).length ? Object.keys(G.ledger) : G.allMapel.map(function (m) { return m.nama; });
+  const html = names.map(function (name) {
+    return '<option value="' + esc(name) + '">' + esc(name) + '</option>';
+  }).join('');
+  // biarkan baris pengisian innerHTML di bawah ini tetap seperti semula
     if (select) {
       select.innerHTML = html;
       if (names.indexOf(G.activeWaliPovSubject) !== -1) select.value = G.activeWaliPovSubject;

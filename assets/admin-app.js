@@ -811,36 +811,34 @@
   }
 
   function openAddStudentModal() {
-    document.getElementById('input-siswa-id').value = '';
-    document.getElementById('modal-siswa-title').innerText = 'Tambah Siswa Baru';
-    document.getElementById('modal-siswa-desc').innerText = 'Masukkan data peserta didik ke buku induk sekolah.';
-    document.getElementById('modal-siswa-submit-text').innerText = 'Daftarkan Siswa';
-    document.getElementById('input-siswa-name').value = '';
-    document.getElementById('input-siswa-nisn').value = '';
-    document.getElementById('input-siswa-gender').value = 'L';
-    document.getElementById('input-siswa-status').value = 'Aktif';
-    document.getElementById('input-siswa-parent').value = '';
-    document.getElementById('input-siswa-phone').value = '';
-    fillRombelSelect(document.getElementById('input-siswa-class'), false, 'VIII A');
-    document.getElementById('modal-siswa').classList.remove('hidden');
-  }
+  document.getElementById('input-siswa-id').value = '';
+  document.getElementById('modal-siswa-title').innerText = 'Tambah Siswa Baru';
+  document.getElementById('modal-siswa-desc').innerText = 'Masukkan data peserta didik ke buku induk sekolah.';
+  document.getElementById('input-siswa-name').value = '';
+  document.getElementById('input-siswa-nisn').value = '';
+  document.getElementById('input-siswa-gender').value = 'L';
+  document.getElementById('input-siswa-status').value = 'Aktif';
+  document.getElementById('input-siswa-parent').value = '';
+  document.getElementById('input-siswa-phone').value = '';
+  fillRombelSelect(document.getElementById('input-siswa-class'), false, 'VIII A');
+  document.getElementById('modal-siswa').classList.remove('hidden');
+}
 
   function editStudent(id) {
-    const s = state.students.find(function (x) { return Number(x.id) === Number(id); });
-    if (!s) return;
-    document.getElementById('input-siswa-id').value = s.id;
-    document.getElementById('modal-siswa-title').innerText = 'Edit Data Siswa';
-    document.getElementById('modal-siswa-desc').innerText = 'Perbarui data induk untuk ' + s.name + ' (' + s.nisn + ').';
-    document.getElementById('modal-siswa-submit-text').innerText = 'Simpan Perubahan Siswa';
-    document.getElementById('input-siswa-name').value = s.name;
-    document.getElementById('input-siswa-nisn').value = s.nisn === '-' ? '' : s.nisn;
-    document.getElementById('input-siswa-gender').value = s.gender;
-    document.getElementById('input-siswa-status').value = s.status;
-    document.getElementById('input-siswa-parent').value = s.parent === '-' ? '' : s.parent;
-    document.getElementById('input-siswa-phone').value = s.phone === '-' ? '' : s.phone;
-    fillRombelSelect(document.getElementById('input-siswa-class'), false, s.class);
-    document.getElementById('modal-siswa').classList.remove('hidden');
-  }
+  const s = state.students.find(function (x) { return Number(x.id) === Number(id); });
+  if (!s) return;
+  document.getElementById('input-siswa-id').value = s.id;
+  document.getElementById('modal-siswa-title').innerText = 'Edit Data Siswa';
+  document.getElementById('modal-siswa-desc').innerText = 'Perbarui data induk untuk ' + s.name + ' (' + s.nisn + ').';
+  document.getElementById('input-siswa-name').value = s.name;
+  document.getElementById('input-siswa-nisn').value = s.nisn === '-' ? '' : s.nisn;
+  document.getElementById('input-siswa-gender').value = s.gender;
+  document.getElementById('input-siswa-status').value = s.status;
+  document.getElementById('input-siswa-parent').value = s.parent === '-' ? '' : s.parent;
+  document.getElementById('input-siswa-phone').value = s.phone === '-' ? '' : s.phone;
+  fillRombelSelect(document.getElementById('input-siswa-class'), false, s.class);
+  document.getElementById('modal-siswa').classList.remove('hidden');
+}
 
   function closeModalSiswa() {
     document.getElementById('modal-siswa').classList.add('hidden');

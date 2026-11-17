@@ -1324,7 +1324,7 @@ if (!function_exists('e')) {
             Batal
           </button>
           <button type="submit" class="px-5 py-2 bg-indigo-950 hover:bg-indigo-900 text-white font-bold rounded-xl shadow-sm flex items-center gap-1.5">
-            <span id="modal-siswa-submit-text">Daftarkan Siswa</span>
+            Simpan
           </button>
         </div>
       </form>

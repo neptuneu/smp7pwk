@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = find_login_user($koneksi, $identifier);
 
             // Pesan error dibuat generik agar tidak membocorkan akun mana yang ada.
-            if (!$user) {
+            if (!$user || !password_verify($password, (string) $user['password_hash'])) {
                 $errors[] = 'Kombinasi akun dan kata sandi tidak cocok.';
                 if (catat_login_gagal($now)) {
                     $errors = ['Terlalu banyak percobaan login. Coba lagi dalam 60 detik.'];
