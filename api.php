@@ -440,6 +440,7 @@ function fetch_students(mysqli $db): array
     foreach ($rows as $s) {
         $result[] = [
             'id'          => (int) $s['id'],
+            'nis'         => $s['nis'] ?: '-',
             'nisn'        => $s['nisn'] ?: '-',
             'name'        => $s['nama_siswa'],
             'gender'      => $s['gender'],
@@ -676,6 +677,66 @@ function fetch_archive_teachers(mysqli $db): array
         'year'        => $a['tahun'] ? (string) $a['tahun'] : '-',
         'sk'          => $a['sk'] ?: '-',
     ], $rows);
+}
+
+/**
+ * Sinkronkan arsip_siswa dengan status data_siswa.
+ * - Status Lulus / Mutasi / Mengundurkan Diri → berkas arsip dibuat atau diperbarui.
+ * - Status kembali ke Aktif (dari non-Aktif)   → berkas arsip siswa itu dihapus.
+ * Data siswa, nilai, dan presensi tidak dihapus. Panggil di dalam transaksi pemanggil.
+ */
+function sync_arsip_siswa(mysqli $db, int $siswaId, ?string $oldStatus = null): void
+{
+    $s = db_select_one(
+        $db,
+        'SELECT s.id, s.nisn, s.nama_siswa, s.telepon, s.status, r.nama AS rombel_nama
+         FROM data_siswa s
+         LEFT JOIN rombel r ON r.id = s.rombel_id
+         WHERE s.id = ?',
+        'i',
+        [$siswaId]
+    );
+    if (!$s) return;
+
+    if ($s['status'] === 'Aktif') {
+        if ($oldStatus !== null && $oldStatus !== 'Aktif') {
+            db_execute($db, 'DELETE FROM arsip_siswa WHERE siswa_id = ?', 'i', [$siswaId]);
+        }
+        return;
+    }
+
+    $arsipStatus = $s['status'] === 'Mutasi' ? 'Mutasi Keluar' : (string) $s['status'];
+    if (!in_array($arsipStatus, ['Lulus', 'Mutasi Keluar', 'Mengundurkan Diri'], true)) return;
+
+    $nisn = ($s['nisn'] ?? '') !== '' ? (string) $s['nisn'] : null;
+    $name = (string) $s['nama_siswa'];
+    $lastClass = (string) ($s['rombel_nama'] ?? '');
+    $phone = (string) ($s['telepon'] ?? '');
+
+    $exist = db_select_one(
+        $db,
+        'SELECT id, last_class FROM arsip_siswa WHERE siswa_id = ? ORDER BY id DESC LIMIT 1',
+        'i',
+        [$siswaId]
+    );
+    if ($exist) {
+        db_execute(
+            $db,
+            'UPDATE arsip_siswa SET nisn = ?, nama_siswa = ?, last_class = ?, status = ?, phone = ? WHERE id = ?',
+            'sssssi',
+            [$nisn, $name, $lastClass !== '' ? $lastClass : (string) $exist['last_class'], $arsipStatus, $phone, (int) $exist['id']]
+        );
+        return;
+    }
+
+    $bulan = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    db_insert(
+        $db,
+        'INSERT INTO arsip_siswa (siswa_id, nisn, nama_siswa, last_class, status, time_label, tahun, destination, phone)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        'isssssiss',
+        [$siswaId, $nisn, $name, $lastClass, $arsipStatus, $bulan[(int) date('n')] . ' ' . date('Y'), (int) date('Y'), '', $phone]
+    );
 }
 
 function fetch_settings(mysqli $db): array
@@ -1044,6 +1105,7 @@ try {
             $phone = inp('phone', '-');
 
             if (mb_strlen($name) < 3) fail('Nama siswa wajib diisi (minimal 3 karakter).');
+            if ($nis !== '' && !preg_match('/^[0-9]{8}$/', $nis)) fail('NIS harus 8 digit angka.');
             if (!in_array($gender, ['L', 'P'], true)) $gender = 'L';
             $statusMap = ['Aktif Belajar' => 'Aktif', 'Lulus' => 'Lulus', 'Mutasi' => 'Mutasi', 'Mengundurkan Diri' => 'Mengundurkan Diri'];
             $status = $statusMap[$status] ?? $status;
@@ -1061,6 +1123,12 @@ try {
                 if ($dupNis) fail('NIS tersebut sudah terdaftar pada siswa lain.');
             }
 
+            $oldRow = $id > 0 ? db_select_one($koneksi, 'SELECT status, nisn FROM data_siswa WHERE id = ?', 'i', [$id]) : null;
+            $oldStatus = $oldRow['status'] ?? null;
+            // Form tidak lagi mengirim NISN: pertahankan NISN yang sudah tersimpan.
+            if (!array_key_exists('nisn', $_POST) && $oldRow) {
+                $nisn = (string) ($oldRow['nisn'] ?? '');
+            }
             $koneksi->begin_transaction();
             if ($id > 0) {
                 if ($nis !== '') {
@@ -1115,6 +1183,7 @@ try {
                     $username, $name, $passwordHash, (int) $student['user_id']
                 ]);
             }
+            sync_arsip_siswa($koneksi, (int) $studentId, $oldStatus);
             $koneksi->commit();
             ok('Data siswa berhasil disimpan.', ['id' => $studentId]);
 
@@ -1151,7 +1220,9 @@ try {
                     $affected += db_execute($koneksi, 'UPDATE data_siswa SET rombel_id = ? WHERE id = ?', 'ii', [(int) $rombel['id'], $sid]);
                 }
                 if ($targetStatus !== '') {
+                    $oldRow = db_select_one($koneksi, 'SELECT status FROM data_siswa WHERE id = ?', 'i', [$sid]);
                     $affected += db_execute($koneksi, 'UPDATE data_siswa SET status = ? WHERE id = ?', 'si', [$targetStatus, $sid]);
+                    sync_arsip_siswa($koneksi, (int) $sid, $oldRow['status'] ?? null);
                 }
             }
             $koneksi->commit();
@@ -1204,6 +1275,7 @@ try {
                     );
                     db_execute($koneksi, 'UPDATE data_siswa SET user_id = ? WHERE id = ?', 'ii', [$userId, $studentId]);
                 }
+                sync_arsip_siswa($koneksi, (int) $studentId);
                 $inserted++;
             }
             fclose($handle);

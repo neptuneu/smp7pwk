@@ -897,6 +897,9 @@
     }
     const label = document.getElementById('journal-count-label');
     if (label) label.innerText = 'Menampilkan ' + G.journals.length + ' entri jurnal mengajar';
+
+    const badge = document.getElementById('badge-jurnal-count');
+    if (badge) badge.innerText = G.journals.length + ' Catatan';
   }
 
   function openAddJournalModal(id) {
@@ -1465,6 +1468,12 @@
     }
   }
 
+  function updateModuleBadges(count) {
+    document.querySelectorAll('[data-modul-count]').forEach(function (el) {
+      el.innerText = count + ' File';
+    });
+  }
+
   async function renderModuleList() {
     const container = document.getElementById('module-list-container');
     if (!container) return;
@@ -1483,6 +1492,7 @@
     try {
       const data = await api('get_materi', { rombel: G.activeClass, mapel: G.activeSubject });
       G.modules = data.modules || [];
+      updateModuleBadges(G.modules.length);
 
       // Sembunyikan form upload jika bukan pengampu dan bukan kepsek
       const uploadForm = document.getElementById('form-upload-modul') || document.getElementById('modul-upload-form');

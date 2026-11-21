@@ -706,7 +706,7 @@
     const status = document.getElementById('filter-siswa-status')?.value || 'ALL';
 
     const filtered = state.students.filter(function (s) {
-      const matchSearch = !search || String(s.name).toLowerCase().indexOf(search) !== -1 || String(s.nisn).toLowerCase().indexOf(search) !== -1;
+      const matchSearch = !search || String(s.name).toLowerCase().indexOf(search) !== -1 || String(s.nis).toLowerCase().indexOf(search) !== -1 || String(s.nisn).toLowerCase().indexOf(search) !== -1;
       const matchJenjang = jenjang === 'ALL' || String(s.tingkat) === String(jenjang);
       const matchRombel = rombel === 'ALL' || s.class === rombel;
       const matchStatus = status === 'ALL' || s.status === status;
@@ -721,7 +721,7 @@
       return '<tr class="' + rowClass + '">' +
         '<td class="py-3 px-3 text-center"><input type="checkbox" class="student-row-checkbox w-4 h-4 rounded border-slate-300 text-indigo-950 focus:ring-indigo-600 cursor-pointer" value="' + s.id + '" ' + (checked ? 'checked' : '') + ' onchange="handleStudentRowCheck(' + s.id + ', this.checked)"></td>' +
         '<td class="py-3 px-4 text-center font-bold text-slate-400">' + (idx + 1) + '</td>' +
-        '<td class="py-3 px-4 font-mono font-bold text-slate-800">' + esc(s.nisn) + '</td>' +
+        '<td class="py-3 px-4 font-mono font-bold text-slate-800">' + esc(s.nis) + '</td>' +
         '<td class="py-3 px-4 font-bold text-indigo-950">' + esc(s.name) + '</td>' +
         '<td class="py-3 px-4 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ' + (s.gender === 'L' ? 'bg-blue-100 text-blue-800' : 'bg-pink-100 text-pink-800') + '">' + esc(s.gender) + '</span></td>' +
         '<td class="py-3 px-4 font-bold text-slate-700"><span class="px-2 py-1 rounded-lg bg-slate-100 border border-slate-200">' + esc(s.class) + '</span></td>' +
@@ -815,7 +815,7 @@
   document.getElementById('modal-siswa-title').innerText = 'Tambah Siswa Baru';
   document.getElementById('modal-siswa-desc').innerText = 'Masukkan data peserta didik ke buku induk sekolah.';
   document.getElementById('input-siswa-name').value = '';
-  document.getElementById('input-siswa-nisn').value = '';
+  document.getElementById('input-siswa-nis').value = '';
   document.getElementById('input-siswa-gender').value = 'L';
   document.getElementById('input-siswa-status').value = 'Aktif';
   document.getElementById('input-siswa-parent').value = '';
@@ -829,9 +829,9 @@
   if (!s) return;
   document.getElementById('input-siswa-id').value = s.id;
   document.getElementById('modal-siswa-title').innerText = 'Edit Data Siswa';
-  document.getElementById('modal-siswa-desc').innerText = 'Perbarui data induk untuk ' + s.name + ' (' + s.nisn + ').';
+  document.getElementById('modal-siswa-desc').innerText = 'Perbarui data induk untuk ' + s.name + ' (' + s.nis + ').';
   document.getElementById('input-siswa-name').value = s.name;
-  document.getElementById('input-siswa-nisn').value = s.nisn === '-' ? '' : s.nisn;
+  document.getElementById('input-siswa-nis').value = s.nis === '-' ? '' : s.nis;
   document.getElementById('input-siswa-gender').value = s.gender;
   document.getElementById('input-siswa-status').value = s.status;
   document.getElementById('input-siswa-parent').value = s.parent === '-' ? '' : s.parent;
@@ -848,7 +848,7 @@
     event.preventDefault();
     const payload = {
       id: document.getElementById('input-siswa-id').value || 0,
-      nisn: document.getElementById('input-siswa-nisn').value.trim(),
+      nis: document.getElementById('input-siswa-nis').value.trim(),
       name: document.getElementById('input-siswa-name').value.trim(),
       gender: document.getElementById('input-siswa-gender').value,
       class: document.getElementById('input-siswa-class').value,
@@ -858,6 +858,10 @@
     };
     if (!payload.name) {
       alert('Nama siswa wajib diisi.');
+      return;
+    }
+    if (!/^[0-9]{8}$/.test(payload.nis)) {
+      alert('NIS harus 8 digit angka.');
       return;
     }
     try {
@@ -897,9 +901,9 @@
   }
 
   function exportStudentsCSV() {
-    let csv = 'No,NISN,Nama Siswa,JK,Kelas,Nama Wali,No HP,Status\n';
+    let csv = 'No,NIS,Nama Siswa,JK,Kelas,Nama Wali,No HP,Status\n';
     state.students.forEach(function (s, i) {
-      csv += [i + 1, csvCell(s.nisn), csvCell(s.name), csvCell(s.gender), csvCell(s.class), csvCell(s.parent), csvCell(s.phone), csvCell(s.status)].join(',') + '\n';
+      csv += [i + 1, csvCell(s.nis), csvCell(s.name), csvCell(s.gender), csvCell(s.class), csvCell(s.parent), csvCell(s.phone), csvCell(s.status)].join(',') + '\n';
     });
     downloadFile(csv, 'Data_Siswa_SMPN7_Purwakarta.csv');
     showToast('Download Berhasil', 'Data siswa berhasil diunduh dari database.');
