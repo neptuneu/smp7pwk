@@ -1197,7 +1197,7 @@ if (!function_exists('e')) {
 
         <div>
           <label class="block font-bold text-slate-700 mb-1">username (Untuk Login)</label>
-          <input type="text" id="input-guru-nip" required placeholder="Contoh: 19820514 200801 1 009" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-slate-800 font-mono focus:ring-2 focus:ring-indigo-600 focus:outline-none">
+          <input type="text" id="input-guru-nip" required placeholder="Contoh: user123" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-slate-800 font-mono focus:ring-2 focus:ring-indigo-600 focus:outline-none">
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
