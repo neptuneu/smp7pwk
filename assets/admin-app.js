@@ -550,7 +550,7 @@
         '<td class="py-3 px-4"><p class="font-bold text-slate-900 text-xs">' + esc(g.name) + '</p>' +
         '<div class="flex flex-wrap items-center gap-1.5 mt-0.5">' +
         '<span class="inline-block bg-slate-100 text-indigo-900 font-semibold px-1.5 py-0.5 rounded text-[10px]">Kd: ' + esc(g.kode) + '</span>' +
-        '<span class="text-slate-500 font-mono text-[11px]">NIP. ' + esc(g.nip) + '</span>' +
+        '<span class="text-slate-500 font-mono text-[11px]">User: ' + esc(g.nip) + '</span>' +
         (g.username && g.username !== '-' ? '<span class="inline-block bg-slate-50 text-slate-600 font-mono px-1.5 py-0.5 rounded text-[10px] border border-slate-200">@' + esc(g.username) + '</span>' : '') +
         '</div></td>' +
         '<td class="py-3 px-4"><span class="inline-flex items-center px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-800 font-semibold text-[11px] border border-indigo-100">' + esc(g.mapel) + '</span>' +
@@ -637,7 +637,7 @@
     } catch (err) {
       alert('Gagal menyimpan: ' + err.message);
     } finally {
-      if (button) { button.disabled = false; button.innerText = 'Simpan ke Database'; }
+      if (button) { button.disabled = false; button.innerText = 'Simpan'; }
     }
   }
 
@@ -655,7 +655,7 @@
   }
 
   function exportTeachersCSV() {
-    let csv = 'No,Nama Lengkap,NIP,Mata Pelajaran,Kelas,Wali Kelas,Telepon,Status\n';
+    let csv = 'No,Nama Lengkap,username,Mata Pelajaran,Kelas,Wali Kelas,Telepon,Status\n';
     state.teachers.forEach(function (g, i) {
       csv += [i + 1, csvCell(g.name), csvCell(g.nip), csvCell(g.mapel), csvCell(g.kelas), csvCell(g.wali), csvCell(g.phone), csvCell(g.status)].join(',') + '\n';
     });
@@ -672,7 +672,7 @@
   }
 
   function downloadTeacherCSVTemplate() {
-    const template = 'NIP,NAMA_LENGKAP,MATA_PELAJARAN,TUGAS_TAMBAHAN_WALI,NO_TELEPON,STATUS\n19850101 201001 1 001,Nama Guru Contoh,Matematika,Wali Kelas VII A,08123456789,Aktif\n';
+    const template = 'username,NAMA_LENGKAP,MATA_PELAJARAN,TUGAS_TAMBAHAN_WALI,NO_TELEPON,STATUS\n19850101 201001 1 001,Nama Guru Contoh,Matematika,Wali Kelas VII A,08123456789,Aktif\n';
     downloadFile(template, 'Template_Upload_Guru_SMPN7.csv');
   }
 
@@ -957,7 +957,8 @@
     document.getElementById('input-mapel-orig-code').value = '';
     document.getElementById('modal-mapel-title').innerText = 'Tambah Mata Pelajaran Baru';
     document.getElementById('modal-mapel-desc').innerText = 'Isi rincian kurikulum mapel secara manual oleh Administrator.';
-    document.getElementById('modal-mapel-submit-text').innerText = 'Simpan Mata Pelajaran';
+    const submitBtn = document.querySelector('#modal-mapel button[type="submit"]');
+    if (submitBtn) submitBtn.textContent = 'Simpan';
     document.getElementById('input-mapel-code').value = 'MP-' + String(nextNum).padStart(2, '0');
     document.getElementById('input-mapel-name').value = '';
     document.getElementById('input-mapel-group').value = 'Kelompok B (Pengembangan)';
@@ -974,7 +975,8 @@
     document.getElementById('input-mapel-orig-code').value = m.code;
     document.getElementById('modal-mapel-title').innerText = 'Edit Mata Pelajaran';
     document.getElementById('modal-mapel-desc').innerText = 'Perbarui rincian kurikulum untuk ' + m.name + ' (' + m.code + ').';
-    document.getElementById('modal-mapel-submit-text').innerText = 'Simpan Perubahan Mapel';
+    const submitBtn = document.querySelector('#modal-mapel button[type="submit"]');
+    if (submitBtn) submitBtn.textContent = 'Simpan';
     document.getElementById('input-mapel-code').value = m.code;
     document.getElementById('input-mapel-name').value = m.name;
     document.getElementById('input-mapel-group').value = m.group;
@@ -1547,7 +1549,7 @@
         : '<span class="px-2.5 py-0.5 rounded-full font-bold text-[10px] bg-blue-100 text-blue-800 border border-blue-200">' + esc(g.status) + '</span>';
       return '<tr class="hover:bg-slate-50 transition-colors">' +
         '<td class="py-3 px-4 text-center font-bold text-slate-400">' + (idx + 1) + '</td>' +
-        '<td class="py-3 px-4"><p class="font-bold text-slate-800 text-xs">' + esc(g.name) + '</p><p class="text-[11px] font-mono text-slate-400">NIP: ' + esc(g.nip) + '</p></td>' +
+        '<td class="py-3 px-4"><p class="font-bold text-slate-800 text-xs">' + esc(g.name) + '</p><p class="text-[11px] font-mono text-slate-400">User: ' + esc(g.nip) + '</p></td>' +
         '<td class="py-3 px-4 font-medium text-slate-700">' + esc(g.lastSubject) + '</td>' +
         '<td class="py-3 px-4 text-center">' + badge + '</td>' +
         '<td class="py-3 px-4 font-semibold text-slate-700"><span class="inline-flex items-center gap-1">📅 ' + esc(g.time) + '</span></td>' +
@@ -1579,7 +1581,7 @@
   }
 
   function downloadArchivedTeachersCSV() {
-    let csv = 'No,NIP,Nama Lengkap,Mapel/Posisi Terakhir,Status Arsip,Waktu Pensiun/Keluar,No SK / Catatan,Tahun\n';
+    let csv = 'No,username,Nama Lengkap,Mapel/Posisi Terakhir,Status Arsip,Waktu Pensiun/Keluar,No SK / Catatan,Tahun\n';
     state.archivedTeachers.forEach(function (g, i) {
       csv += [i + 1, csvCell(g.nip), csvCell(g.name), csvCell(g.lastSubject), csvCell(g.status), csvCell(g.time), csvCell(g.sk), csvCell(g.year)].join(',') + '\n';
     });
@@ -1706,7 +1708,7 @@
       title.innerText = 'Arsip Pendidik: ' + g.name;
       typeLabel.innerText = 'Master Data Pendidik Purna Tugas / Mutasi';
       content.innerHTML = '<div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">' +
-        '<div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-400">NIP</span><span class="font-bold text-slate-800 font-mono">' + esc(g.nip) + '</span></div>' +
+        '<div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-400">username</span><span class="font-bold text-slate-800 font-mono">' + esc(g.nip) + '</span></div>' +
         '<div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-400">Mapel / Posisi Terakhir</span><span class="font-bold text-slate-800">' + esc(g.lastSubject) + '</span></div>' +
         '<div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-400">Status Diarsipkan</span><span class="font-bold text-purple-900">' + esc(g.status) + '</span></div>' +
         '<div class="flex justify-between py-1 border-b border-slate-100"><span class="text-slate-400">Waktu Pensiun/Keluar</span><span class="font-bold text-purple-700">📅 ' + esc(g.time) + '</span></div>' +

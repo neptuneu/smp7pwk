@@ -162,7 +162,7 @@ $csrf = csrf_token();
     <section class="md:col-span-7 p-6 sm:p-10 flex flex-col justify-center">
       <div class="max-w-md w-full mx-auto">
         <h2 class="text-xl sm:text-2xl font-extrabold text-indigo-950">Masuk ke Akun Anda</h2>
-        <p class="text-xs text-slate-500 mt-1">Siswa gunakan NIS &amp; 4 digit terakhir NIS sebagai sandi. Guru gunakan NIP.</p>
+        <p class="text-xs text-slate-500 mt-1">Siswa gunakan NIS &amp; 4 digit terakhir NIS sebagai sandi. Guru gunakan username.</p>
 
         <?php if ($justRegistered): ?>
           <div class="mt-4 p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold flex items-start gap-2.5">
@@ -187,9 +187,9 @@ $csrf = csrf_token();
           <input type="hidden" name="next" value="<?= e((string) $nextValue) ?>">
 
           <div>
-            <label for="identifier" class="block font-bold text-slate-700 mb-1.5">NIS Siswa / NIP Guru / Username</label>
+            <label for="identifier" class="block font-bold text-slate-700 mb-1.5">NIS Siswa / Username</label>
             <input id="identifier" name="identifier" type="text" required autocomplete="username"
-                   value="<?= e($old['identifier']) ?>" placeholder="contoh: 24257001 (NIS) / 1985xxxx (NIP) / admin"
+                   value="<?= e($old['identifier']) ?>" placeholder="contoh: 24257001 (NIS) / user123 / admin"
                    class="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 focus:outline-none">
           </div>
 

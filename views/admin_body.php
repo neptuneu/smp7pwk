@@ -565,8 +565,8 @@ if (!function_exists('e')) {
           <!-- Filter & Search Toolbar -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5 pt-4 border-t border-slate-100 text-xs">
             <div>
-              <label class="block font-semibold text-slate-600 mb-1">Cari Nama / NIP</label>
-              <input type="text" id="filter-guru-search" oninput="renderTeachersTable()" placeholder="Ketik nama atau NIP..." class="w-full border border-slate-300 rounded-xl px-3 py-2 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+              <label class="block font-semibold text-slate-600 mb-1">Cari Nama / username</label>
+              <input type="text" id="filter-guru-search" oninput="renderTeachersTable()" placeholder="Ketik nama atau username..." class="w-full border border-slate-300 rounded-xl px-3 py-2 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             </div>
             <div>
               <label class="block font-semibold text-slate-600 mb-1">Filter Mata Pelajaran</label>
@@ -590,7 +590,7 @@ if (!function_exists('e')) {
               <thead>
                 <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
                   <th class="py-3.5 px-4 w-12 text-center">No</th>
-                  <th class="py-3.5 px-4">Nama Lengkap & NIP</th>
+                  <th class="py-3.5 px-4">Nama Lengkap & username</th>
                   <th class="py-3.5 px-4">Mata Pelajaran yang Diampu</th>
                   <th class="py-3.5 px-4">Tugas Tambahan</th>
                   <th class="py-3.5 px-4">Kontak / Email</th>
@@ -1028,8 +1028,8 @@ if (!function_exists('e')) {
           <!-- Filter Toolbar Arsip Guru -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-5 pt-4 border-t border-slate-100 text-xs">
             <div>
-              <label class="block font-semibold text-slate-600 mb-1">Cari Nama / NIP</label>
-              <input type="text" id="filter-arsip-guru-search" oninput="renderArchivedTeachersTable()" placeholder="Ketik nama atau NIP..." class="w-full border border-slate-300 rounded-xl px-3 py-2 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+              <label class="block font-semibold text-slate-600 mb-1">Cari Nama / username</label>
+              <input type="text" id="filter-arsip-guru-search" oninput="renderArchivedTeachersTable()" placeholder="Ketik nama atau username..." class="w-full border border-slate-300 rounded-xl px-3 py-2 text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             </div>
             <div>
               <label class="block font-semibold text-slate-600 mb-1">Kategori Arsip</label>
@@ -1059,7 +1059,7 @@ if (!function_exists('e')) {
               <thead>
                 <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
                   <th class="py-3.5 px-4 w-12 text-center">No</th>
-                  <th class="py-3.5 px-4">Nama Lengkap & NIP</th>
+                  <th class="py-3.5 px-4">Nama Lengkap & username</th>
                   <th class="py-3.5 px-4">Mata Pelajaran / Posisi Terakhir</th>
                   <th class="py-3.5 px-4 text-center">Status Arsip</th>
                   <th class="py-3.5 px-4">Waktu Pensiun / Keluar</th>
@@ -1196,7 +1196,7 @@ if (!function_exists('e')) {
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 mb-1">NIP / Nomor Pegawai (Untuk Login)</label>
+          <label class="block font-bold text-slate-700 mb-1">username (Untuk Login)</label>
           <input type="text" id="input-guru-nip" required placeholder="Contoh: 19820514 200801 1 009" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-slate-800 font-mono focus:ring-2 focus:ring-indigo-600 focus:outline-none">
         </div>
 
@@ -1248,7 +1248,7 @@ if (!function_exists('e')) {
             Batal
           </button>
           <button type="submit" id="btn-save-teacher" class="px-5 py-2 bg-indigo-950 hover:bg-indigo-900 text-white font-bold rounded-xl shadow-sm flex items-center gap-1.5">
-            <span>Simpan ke Database</span>
+            Simpan
           </button>
         </div>
       </form>
@@ -1402,7 +1402,7 @@ if (!function_exists('e')) {
             Batal
           </button>
           <button type="submit" class="px-5 py-2 bg-indigo-950 hover:bg-indigo-900 text-white font-bold rounded-xl shadow-sm flex items-center gap-1.5">
-            <span id="modal-mapel-submit-text">Simpan Mata Pelajaran</span>
+            Simpan
           </button>
         </div>
       </form>
@@ -1477,7 +1477,7 @@ if (!function_exists('e')) {
           <div class="border-2 border-dashed border-indigo-200 bg-indigo-50/40 rounded-2xl p-6 text-center flex flex-col items-center justify-center">
             <svg class="w-10 h-10 text-indigo-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
             <p class="font-bold text-indigo-950">Pilih Berkas Excel / CSV Guru & Staff</p>
-            <p class="text-slate-400 text-[11px] mt-1 mb-4">Format kolom: NIP, Nama Lengkap, Mapel, Tugas Tambahan/Wali, No HP, Status</p>
+            <p class="text-slate-400 text-[11px] mt-1 mb-4">Format kolom: username, Nama Lengkap, Mapel, Tugas Tambahan/Wali, No HP, Status</p>
             
             <!-- INPUT FILE UNTUK MENANGKAP CSV DARI KOMPUTER -->
             <input type="file" name="csv_file" accept=".csv" required class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-100 file:text-indigo-900 hover:file:bg-indigo-200 cursor-pointer border border-slate-200 rounded-xl p-1 bg-white">
@@ -1831,7 +1831,7 @@ if (!function_exists('e')) {
             <input type="text" id="edit-arsip-guru-name" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-slate-800 font-semibold focus:ring-2 focus:ring-indigo-600 focus:outline-none">
           </div>
           <div>
-            <label class="block font-bold text-slate-700 mb-1">NIP <span class="text-rose-500">*</span></label>
+            <label class="block font-bold text-slate-700 mb-1">username <span class="text-rose-500">*</span></label>
             <input type="text" id="edit-arsip-guru-nip" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-slate-800 font-mono focus:ring-2 focus:ring-indigo-600 focus:outline-none">
           </div>
         </div>
